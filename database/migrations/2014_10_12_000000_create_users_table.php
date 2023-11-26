@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_admin'); 
             $table->boolean('is_active'); 
+            $table->timestamp('deleted_at')->nullable(); 
             $table->rememberToken();
             $table->timestamps();
         });
