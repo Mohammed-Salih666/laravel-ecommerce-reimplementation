@@ -12,12 +12,13 @@ class AddressController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(User $user)
     {
-        return Address::all(); 
+        $addresses = $user->address(); 
+        return($addresses);  
     }
 
-    /**
+    /**        
      * Show the form for creating a new resource.
      */
     public function create()
@@ -44,9 +45,10 @@ class AddressController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Address $address)
+    public function show(User $user, Address $address)
     {
-        return Address::findOrFail($address); 
+        return $user->address()->findOrFail($address->id);
+        // return Address::findOrFail($address); 
     }
 
     /**
