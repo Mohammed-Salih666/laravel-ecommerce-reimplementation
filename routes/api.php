@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CartController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +22,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::resource('/users', UserController::class); 
 Route::resource('/users/{user}/addresses', AddressController::class);
+Route::get('/users/{user}/cart', [CartController::class, 'index']);
+Route::post('/users/{user}/cart/add-product', [CartController::class, 'add']);
+Route::delete('/users/{user}/cart', [CartController::class, 'remove']);
