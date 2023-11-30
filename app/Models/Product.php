@@ -16,7 +16,6 @@ class Product extends Model
         'name', 
         'price', 
         'old_price', 
-        'lead', 
         'description', 
         'slug', 
         'is_active'
