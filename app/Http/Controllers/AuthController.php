@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Routing\Controller;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
@@ -62,5 +64,47 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'logged out'
         ]);
+    }
+
+    //Request Signature: 
+    /*
+    User 
+    Role Name
+    Permission Name 
+    */
+    public function authorizeTo(Request $request) 
+    {
+  
+        $user = User::find($request->user);
+
+        $role = $this->getOrCreateRole($request->role);  
+        // $permission = $this->getOrCreatePermission($request->permission); 
+
+        $user->assignRole($role['name']); 
+        //or: 
+        // $user->givePermissionTo($permission); 
+
+        return response()->json([
+            'user' => $user, 
+            'role' => $role
+        ]);
+    }
+
+    private function getOrCreateRole($roleName) {
+        $role = Role::where('name', $roleName)->first(); 
+        if($role == null) {
+            $role = Role::create(['name' => $roleName, 'guard_name' => 'web']);
+            return $role; 
+        }
+        return $role; 
+    }
+
+    private function getOrCreatePermission($permissionName) {
+        $permission = Permission::where('name', $permissionName)->first(); 
+        if($permission == null) {
+            $permission = Permission::create(['name'=> $permissionName]); 
+            return $permission; 
+        }
+        return $permission; 
     }
 }
