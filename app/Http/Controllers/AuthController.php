@@ -78,7 +78,8 @@ class AuthController extends Controller
         $user = User::find($request->user);
 
         $role = $this->getOrCreateRole($request->role);  
-        // $permission = $this->getOrCreatePermission($request->permission); 
+        $permission = $this->getOrCreatePermission($request->permission); 
+        $role->givePermissionTo($permission['name']); 
 
         $user->assignRole($role['name']); 
         //or: 
@@ -87,6 +88,23 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user, 
             'role' => $role
+        ]);
+    }
+
+
+    public function unauthorize(Request $request) {
+        $user = User::find($request->user); 
+        $role = $request->role; 
+        $permission = $request->permission; 
+
+        $user->revokePermissionTo($permission); 
+        $user->removeRole($role); 
+
+        return response()->json([
+            'user' => $user, 
+            'role' => $role, 
+            'permission' => $permission, 
+            'message' => 'Removed'
         ]);
     }
 
@@ -102,7 +120,7 @@ class AuthController extends Controller
     private function getOrCreatePermission($permissionName) {
         $permission = Permission::where('name', $permissionName)->first(); 
         if($permission == null) {
-            $permission = Permission::create(['name'=> $permissionName]); 
+            $permission = Permission::create(['name'=> $permissionName, 'guard_name' => 'web']); 
             return $permission; 
         }
         return $permission; 
