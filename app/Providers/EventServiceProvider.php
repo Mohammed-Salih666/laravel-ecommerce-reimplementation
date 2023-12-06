@@ -20,9 +20,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        UserRegistered::class => [
-            NotifyRegisteredUser::class, 
-        ],
+        // UserRegistered::class => [
+        //     NotifyRegisteredUser::class, 
+        // ],
     ];
 
     /**
@@ -38,6 +38,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function shouldDiscoverEvents(): bool
     {
-        return false;
+        return true;
     }
 }
