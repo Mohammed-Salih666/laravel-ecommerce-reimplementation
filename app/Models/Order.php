@@ -11,7 +11,10 @@ class Order extends Model
 
     protected $fillable = [
         'cart_id', 
-        'code'
+        'code', 
+        'session_id',
+        'total_price',
+        'is_paid'
     ];
 
     public function details() {
