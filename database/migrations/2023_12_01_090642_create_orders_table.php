@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cart_id')->constrained('carts'); 
             $table->string('code'); 
+            $table->string('session_id'); 
+            $table->decimal('total_price'); 
+            $table->boolean('is_paid');
             $table->timestamps();
         });
     }
