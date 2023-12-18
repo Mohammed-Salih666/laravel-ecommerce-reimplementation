@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/users/{user}/cart/add-product', [CartController::class, 'add']);
     Route::delete('/users/{user}/cart', [CartController::class, 'remove']);
 
+    Route::post('/checkout', [CheckoutController::class, 'checkout']); 
+    Route::get('/success', [CheckoutController::class, 'checkout'])->name('checkout.success'); 
+    Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('checkout.cancel');    
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
