@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('warehouse_product', function (Blueprint $table) {
             $table->foreignId('warehouse_id')->constrained()->cascadeOnDelete(); 
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->boolean('is_active');
             $table->primary('warehouse_id', 'product_id');
             $table->timestamps();
         });
