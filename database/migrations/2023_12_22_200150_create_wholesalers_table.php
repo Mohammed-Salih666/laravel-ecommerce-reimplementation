@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('owner_id')->references('users')->on('id'); 
             $table->string('name'); 
+            $table->string('email'); 
             $table->string('address'); 
             $table->boolean('is_active');
             $table->timestamp('deleted_at')->nullable();
