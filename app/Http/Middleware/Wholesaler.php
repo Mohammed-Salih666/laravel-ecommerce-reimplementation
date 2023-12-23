@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,11 +17,20 @@ class Wholesaler
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::check() && Auth::user()->hasRole('wholesaler')) {
-            return $next($request);
-        }
+        $wholesalerId = $request->route('wholesaler');
+        $wholesaler = \App\Models\Wholesaler::find($wholesalerId);
+        
+        $user = $request->user(); 
 
+        if($user && $user->hasRole('wholesaler')) 
+        {
+            if($wholesaler->owner_id == $user->id)
+            {
+                return $next($request); 
+            }
+        }
+        
         return response()->json([
             'error' => 'unauthorized'
-        ]);    }
+        ], 403);    }
 }
