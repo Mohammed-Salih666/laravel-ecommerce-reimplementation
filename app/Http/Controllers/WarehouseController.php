@@ -119,5 +119,51 @@ class WarehouseController extends Controller
             'quantity' => $quantity
         ]);
     }
+ 
+    public function removeFromWarehouse(Request $request)
+    {
+        $warehouse = Warehouse::where('id', $request->warehouse_id)->first(); 
+        $product = $warehouse->products()->where('product_id', $request->product_id)->first(); 
+
+        if($product == null) 
+        {
+            return response()->json([
+                'message' => 'Product not found. Cannot deduct any quantity.'
+            ], 404);
+        }
+
+        $warehouse->products()->updateExistingPivot($product->id, ['quantity' => $product->quantity - $request->quantity]);
+        // $product->update([
+        //     'quantity' => $product->quantity - $request->quantity,
+        // ]); 
+
         
+        if($product->quantity == 0)
+        {
+            //change activity status: 
+            $warehouse->products()->updateExistingPivot($product->id, ['is_active' => false]);
+
+            //notify wholesaler: 
+        }
+
+        $invProduct = GlobalInventory::find($request->product_id);
+        $invProduct->update([
+            'quantity' => $invProduct->quantity - $request->quantity,
+        ]);
+        
+        if($invProduct->quantity == 0)
+        {
+            //change activity status: 
+            Product::find($invProduct->id)->update([
+                'is_active' => false
+            ]);
+            
+            //notify responsible wholesalers
+        }
+
+        return response()->json([
+            'message' => $request->quantity . " of " . $product->name . "has been added to warhouse. Quantity is now" . $product->quantity,
+        ]);
+    
+    }
 }
