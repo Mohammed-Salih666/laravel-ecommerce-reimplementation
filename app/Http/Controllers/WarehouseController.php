@@ -7,6 +7,7 @@ use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use App\Models\GlobalInventory;
 use App\Http\Requests\WarehouseRequest;
+use App\Notifications\WholesalerEmptyWarehouse;
 
 class WarehouseController extends Controller
 {
@@ -133,10 +134,6 @@ class WarehouseController extends Controller
         }
 
         $warehouse->products()->updateExistingPivot($product->id, ['quantity' => $product->quantity - $request->quantity]);
-        // $product->update([
-        //     'quantity' => $product->quantity - $request->quantity,
-        // ]); 
-
         
         if($product->quantity == 0)
         {
@@ -144,6 +141,7 @@ class WarehouseController extends Controller
             $warehouse->products()->updateExistingPivot($product->id, ['is_active' => false]);
 
             //notify wholesaler: 
+            $warehouse->wholesaler()->notify(new WholesalerEmptyWarehouse($warehouse->pivot()));
         }
 
         $invProduct = GlobalInventory::find($request->product_id);
@@ -159,6 +157,10 @@ class WarehouseController extends Controller
             ]);
             
             //notify responsible wholesalers
+            foreach($invProduct->warehouses() as $warehouse)
+            {
+                $warehouse->wholesaler()->notify(new WholesalerEmptyWarehouse($warehouse->pivot())); 
+            }
         }
 
         return response()->json([
