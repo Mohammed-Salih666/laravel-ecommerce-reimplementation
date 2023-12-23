@@ -65,7 +65,36 @@ class WarehouseController extends Controller
         ]);
     }
 
+    //Add a quantity of products to a designated warehouse. 
+    public function addToWarehouse(Request $request) 
+    {
+        $warehouse = Warehouse::where('id', $request->warehouse_id)->first(); 
+        $product = $warehouse->products()->where('product_id', $request->product_id)->first(); 
 
+        if($product == null) 
+        {
+            return response()->json([
+                'message' => 'Product not found. Please insert the product to the warehouse first.'
+            ], 404);
+        }
 
+        $warehouse->products()->updateExistingPivot($product->id, ['quantity' => $product->quantity + $request->quantity]);
+        if(!$product->is_active)
+        {
+            $warehouse->products()->updateExistingPivot($product->id, ['is_active' => true]);
+        }
+        // $product->update([
+            // 'quantity' => $product->quantity + $request->quantity,
+        // ]); 
+
+        $invProduct = GlobalInventory::find($request->product_id);
+        $invProduct->update([
+            'quantity' => $invProduct->quantity + $request->quantity,
+        ]);
+        
+        return response()->json([
+            'message' => $request->quantity . " of " . $product->name . "has been added to warhouse. Quantity is now" . $product->quantity,
+        ]);
+    }
         
 }
