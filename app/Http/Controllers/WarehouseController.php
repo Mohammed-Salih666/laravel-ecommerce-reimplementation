@@ -96,5 +96,28 @@ class WarehouseController extends Controller
             'message' => $request->quantity . " of " . $product->name . "has been added to warhouse. Quantity is now" . $product->quantity,
         ]);
     }
+
+    //insert a new product into the warehouse_product pivot table
+    public function insertNewProduct($warehouseId, $productId, $quantity)
+    {
+        if(!Product::where('id', $productId)->exists()){
+            return response()->json([
+                'message' => 'Error. The product you are trying to insert does not exist. '
+            ], 404);
+        }
+        
+        $warehouse = Warehouse::find($warehouseId); 
+        $warehouse->products()->attach($productId, ['quantity' => $quantity]);
+
+        $invProduct = GlobalInventory::where('product_id', $productId)->first(); 
+        $invProduct->update([
+            'quantity' => $invProduct->quantity + $quantity,
+        ]);
+
+        return response()->json([
+            'message' => 'Product: ' . $productId . ' has been added to the warehouse',
+            'quantity' => $quantity
+        ]);
+    }
         
 }
