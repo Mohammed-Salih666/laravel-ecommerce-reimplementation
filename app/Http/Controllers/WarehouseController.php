@@ -164,6 +164,29 @@ class WarehouseController extends Controller
         return response()->json([
             'message' => $request->quantity . " of " . $product->name . "has been added to warhouse. Quantity is now" . $product->quantity,
         ]);
-    
     }
+
+    public function deleteWarehouseProduct($warehouseId, $productId) 
+    {
+        $warehouse = Warehouse::where('id', $warehouseId)->first(); 
+        $product = $warehouse->products()->where('product_id', $productId);
+
+        if($warehouse == null || $product == null) 
+        {
+            return response()->json([
+                'message' => 'Warehouse or product does not exist.'
+            ], 404);
+        }
+
+        $invProduct = GlobalInventory::find($productId);
+        $invProduct->update([
+            'quantity' => $invProduct->quantity - $product->quantity,
+        ]);
+        $warehouse->products()->detach($productId);
+
+        return response()->json([
+            'message' => 'Product has been permanently removed from warehouse', 
+            'data' => $product,
+        ]);
+    }   
 }
