@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('wholesalers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('owner_id')->references('users')->on('id'); 
+            $table->foreignId('owner_id')->references('id')->on('users'); 
             $table->string('name'); 
             $table->string('email'); 
             $table->string('address'); 
