@@ -79,6 +79,6 @@ Route::middleware('auth:sanctum', 'wholesaler')->group(function(){
     Route::resource('/wholesaler', WholesalerController::class); 
     Route::resource('/wholesaler/{wholesaler}/warehouses', WarehouseController::class)->except(['index']); 
 
-    Route::post('/wholesaler/{wholesaler}/warehouses/{warehouse}', [WarehouseController::class, 'show']);
-    Route::get('/wholeslaer/{wholesaler}/warehouses', [WholesalerController::class, 'getWarehouses']);
+    Route::get('/wholesaler/{wholesaler}/warehouses/{warehouse}', [WarehouseController::class, 'show']);
+    Route::get('/wholesaler/{wholesaler}/warehouses', [WholesalerController::class, 'getWarehouses']);
 });
