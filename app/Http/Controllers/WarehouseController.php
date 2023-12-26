@@ -34,17 +34,17 @@ class WarehouseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Warehouse $warehouse)
+    public function show(string $warehouseId)
     {
-        return Warehouse::findOrFail($warehouse->id); 
+        return Warehouse::findOrFail($warehouseId); 
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(WarehouseRequest $request, Warehouse $warehouse)
+    public function update(WarehouseRequest $request, string $warehouseId)
     {
-        $warehouse = Warehouse::findOrFail($warehouse->id); 
+        $warehouse = Warehouse::findOrFail($warehouseId); 
         $warehouse->update($request->validated()); 
 
         return response()->json([
@@ -56,18 +56,18 @@ class WarehouseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Warehouse $warehouse)
+    public function destroy(string $warehouseId)
     {
-        Warehouse::destroy($warehouse->id);  
+        Warehouse::destroy($warehouseId);  
 
         return response()->json([
             'message' => 'warehouse deleted',
-            'data' => $warehouse
+            'data' => ['warehouse' => $warehouseId]
         ]);
     }
 
     //Add a quantity of products to a designated warehouse. 
-    public function addToWarehouse(Request $request) 
+    public function addToWarehouse(WarehouseRequest $request) 
     {
         $warehouse = Warehouse::where('id', $request->warehouse_id)->first(); 
         $product = $warehouse->products()->where('product_id', $request->product_id)->first(); 
@@ -78,15 +78,11 @@ class WarehouseController extends Controller
                 'message' => 'Product not found. Please insert the product to the warehouse first.'
             ], 404);
         }
-
-        $warehouse->products()->updateExistingPivot($product->id, ['quantity' => $product->quantity + $request->quantity]);
+        $warehouse->products()->updateExistingPivot($product->id, ['quantity' => $product->pivot->quantity + $request->quantity]);
         if(!$product->is_active)
         {
             $warehouse->products()->updateExistingPivot($product->id, ['is_active' => true]);
         }
-        // $product->update([
-            // 'quantity' => $product->quantity + $request->quantity,
-        // ]); 
 
         $invProduct = GlobalInventory::find($request->product_id);
         $invProduct->update([
@@ -94,13 +90,16 @@ class WarehouseController extends Controller
         ]);
         
         return response()->json([
-            'message' => $request->quantity . " of " . $product->name . "has been added to warhouse. Quantity is now" . $product->quantity,
+            'message' => $request->quantity . " of " . $product->name . " has been added to warhouse. Quantity is now " . $product->quantity . ".",
         ]);
     }
 
     //insert a new product into the warehouse_product pivot table
-    public function insertNewProduct($warehouseId, $productId, $quantity)
+    public function insertNewProduct(WarehouseRequest $request)
     {
+        $warehouseId = $request->warehouse_id; 
+        $productId = $request->product_id; 
+        $quantity = $request->quantity; 
         if(!Product::where('id', $productId)->exists()){
             return response()->json([
                 'message' => 'Error. The product you are trying to insert does not exist. '
@@ -121,7 +120,7 @@ class WarehouseController extends Controller
         ]);
     }
  
-    public function removeFromWarehouse(Request $request)
+    public function removeFromWarehouse(WarehouseRequest $request)
     {
         $warehouse = Warehouse::where('id', $request->warehouse_id)->first(); 
         $product = $warehouse->products()->where('product_id', $request->product_id)->first(); 
@@ -168,8 +167,11 @@ class WarehouseController extends Controller
         ]);
     }
 
-    public function deleteWarehouseProduct($warehouseId, $productId) 
+    public function deleteWarehouseProduct(WarehouseRequest $request) 
     {
+        $warehouseId = $request->warehouse_id; 
+        $productId = $request->product_id; 
+
         $warehouse = Warehouse::where('id', $warehouseId)->first(); 
         $product = $warehouse->products()->where('product_id', $productId);
 
