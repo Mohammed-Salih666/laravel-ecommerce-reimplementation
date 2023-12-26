@@ -62,7 +62,7 @@ class WholesalerController extends Controller
     
     public function getWarehouses($wholesalerId)
     {
-        return Wholesaler::findOrFail($wholesalerId)->warehouses();
+        return Wholesaler::findOrFail($wholesalerId)->warehouses;
     }
 
 
