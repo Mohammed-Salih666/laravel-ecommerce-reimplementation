@@ -12,6 +12,10 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\WholesalerController;
+use App\Models\Warehouse;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,4 +66,19 @@ Route::middleware('auth:sanctum', 'admin')->group(function() {
     Route::resource('/users', UserController::class); 
     Route::resource('/products', ProductController::class)->except(['index', 'show']);
     Route::resource('/categories', CategoryController::class)->except(['index', 'show']);
+    Route::resource('/inventory', InventoryController::class);
+    Route::resource('/warehouses', WarehouseController::class);
+});
+
+Route::middleware('auth:sanctum', 'wholesaler')->group(function(){
+    Route::post('/wholesaler/{wholesaler}/warehouse/{warehouse}/add', [WarehouseController::class, 'addToWarehouse']); 
+    Route::post('/wholesaler/{wholesaler}/warehouse/{warehouse}/remove', [WarehouseController::class, 'removeFromWarehouse']); 
+    Route::post('/wholesaler/{wholesaler}/warehouse/{warehouse}/insert', [WarehouseController::class, 'insertNewProduct']); 
+    Route::delete('/wholesaler/{wholesaler}/warehouse/{warehouse}/delete-product', [WarehouseController::class, 'deleteWarehouseProduct']);
+
+    Route::resource('/wholesaler', WholesalerController::class); 
+    Route::resource('/wholesaler/{wholesaler}/warehouses', WarehouseController::class)->except(['index']); 
+
+    Route::get('/wholesaler/{wholesaler}/warehouses/{warehouse}', [WarehouseController::class, 'show']);
+    Route::get('/wholesaler/{wholesaler}/warehouses', [WholesalerController::class, 'getWarehouses']);
 });

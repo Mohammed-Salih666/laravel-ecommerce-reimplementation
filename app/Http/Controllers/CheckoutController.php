@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GlobalInventory;
 use Stripe\Stripe;
 use App\Models\Order;
 use App\Models\Product;
@@ -86,6 +87,21 @@ class CheckoutController extends Controller
             if (!$order->is_paid) {
                 $order->is_paid = true;
                 $order->save();
+            }
+
+            $orderDetails = $order->details(); 
+
+            foreach($orderDetails as $detail)
+            {
+                $product = $detail->product();
+                $product->warehouses()
+                ->first()
+                ->updateExistingPivot($product->id, ['quantity' => $product->pivot->quantity - $detail->quantity]); 
+
+                $invProduct = GlobalInventory::find($product->id); 
+                $invProduct->update([
+                    'quantity' => $invProduct->quantity - $detail->quantity
+                ]);
             }
 
             return response()->json([
